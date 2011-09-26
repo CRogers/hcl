@@ -9,4 +9,4 @@ chips = {}
 _chipNames.each (name) ->
 	chips[name[0...-5]] = eval fs.readFileSync "../chips/#{name}", 'utf8'
 
-setTimeout console.log chips
+console.log chips
