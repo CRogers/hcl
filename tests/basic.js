@@ -1,4 +1,4 @@
-var Chip, Clock, chips, chipsReader, clock, dff, fw, x;
+var Chip, Clock, chips, chipsReader, clock, dff, fw;
 fw = require('./framework');
 Chip = require('../bin/chip').Chip;
 Clock = require('../bin/clock').Clock;
@@ -9,10 +9,6 @@ fw.truthTable(new Chip(chips.or, clock), 'a', 'b', 'out', [[[false], [false], [f
 fw.truthTable(new Chip(chips.and, clock), 'a', 'b', 'out', [[[false], [false], [false]], [[false], [true], [false]], [[true], [false], [false]], [[true], [true], [true]]]);
 dff = new Chip(chips.dFlipFlop, clock);
 dff.inputs.d = function() {
-  return [!dff.outputs.q()[0]];
+  return !dff.outputs.q();
 };
-console.log(dff.outputs.q());
-for (x = 0; x <= 10; x++) {
-  clock.advance();
-  console.log(dff.outputs.q());
-}
+fw.truthTable(dff, 'q', [[[false]], [[true]], [[false]], [[true]]]);
