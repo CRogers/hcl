@@ -17,9 +17,12 @@ ones = function(size) {
   return _results;
 };
 Chip = (function() {
-  function Chip(chip) {
+  var lastCalc;
+  lastCalc = -1;
+  function Chip(chip, clock) {
     var func, name, pins, _ref, _ref2;
     this.chip = chip;
+    this.clock = clock;
     this.inputs = {};
     _ref = this.chip.inputs;
     for (name in _ref) {
@@ -35,13 +38,16 @@ Chip = (function() {
   }
   Chip.prototype.setOutput = function(name, func) {
     return this.outputs[name] = __bind(function() {
-      return func.call(this.inputs);
+      if (lastCalc < this.clock.time()) {
+        return func.call(this.inputs);
+      }
     }, this);
   };
   Chip.prototype.setInput = function(name, value) {
-    return this.inputs[name] = typeof value === 'function' ? value : function() {
+    this.inputs[name] = typeof value === 'function' ? value : function() {
       return value;
     };
+    return lastCalc = -1;
   };
   return Chip;
 })();

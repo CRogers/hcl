@@ -14,6 +14,7 @@ exports.truthTable = function() {
       chip.setInput(inputs[i], test[i]);
     }
     console.log(test + ' ' + (arrayEqual(chip.outputs[output](), test[test.length - 1]) ? 'success'.green : 'failure'.red));
+    chip.clock.advance();
   }
   return console.log();
 };

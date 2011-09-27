@@ -6,7 +6,10 @@ ones = (size) ->
 
 
 class Chip
-	constructor: (@chip) ->
+
+	lastCalc = -1
+
+	constructor: (@chip, @clock) ->
 		
 		@inputs = {}
 		
@@ -21,10 +24,15 @@ class Chip
 			@setOutput name, func
 	
 	setOutput: (name, func) ->
-		@outputs[name] = =>
-			func.call @inputs
+		@outputs[name] = =>			
+			# See if we have already calculated the value this tick and only calculate if necessary
+			if lastCalc < @clock.time()
+				func.call @inputs
 	
 	setInput: (name, value) ->
 		@inputs[name] = if typeof value is 'function' then value else -> value
+		
+		# Reset the cache timer as things have changed
+		lastCalc = -1
 
 exports.Chip = Chip

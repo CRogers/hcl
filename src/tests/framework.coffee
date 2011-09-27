@@ -12,5 +12,7 @@ exports.truthTable = (chip, inputs..., output, tests) ->
 			chip.setInput inputs[i], test[i]
 				
 		console.log test+' ' + if arrayEqual chip.outputs[output](), test[test.length-1] then 'success'.green else 'failure'.red
+		
+		chip.clock.advance()
 	
 	console.log()
