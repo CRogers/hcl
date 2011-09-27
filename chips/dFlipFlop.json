@@ -6,11 +6,11 @@
   },
   outputs: {
     q: function() {
-      return [this.state.data];
+      return this.state.data;
     }
   },
   onTick: function() {
-    return this.state.data = this.d()[0];
+    return this.state.data = this.d();
   },
   state: {
     data: [false]

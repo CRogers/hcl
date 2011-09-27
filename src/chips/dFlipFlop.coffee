@@ -4,8 +4,8 @@
 	inputs:
 		d: 1
 	outputs:
-		q: -> [@state.data]
-	onTick: -> 	@state.data = @d()[0]
+		q: -> @state.data
+	onTick: -> @state.data = @d()
 	state:
 		data: [false]
 }
