@@ -1,7 +1,5 @@
-var Chip, a, chips, chipsReader, ones, zeros, _;
+var Chip, ones, zeros;
 var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-_ = require('underscore');
-chipsReader = require('./chip-reader');
 zeros = function(size) {
   var x, _results;
   _results = [];
@@ -47,7 +45,4 @@ Chip = (function() {
   };
   return Chip;
 })();
-chips = chipsReader.readChips();
-a = new Chip(chips.or);
-a.setInput('a', [true]);
-console.log(a.outputs.out());
+exports.Chip = Chip;

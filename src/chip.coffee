@@ -1,6 +1,3 @@
-_ = require 'underscore'
-chipsReader = require './chip-reader'
-
 zeros = (size) ->
 	(false for x in [0...size])
 
@@ -30,10 +27,4 @@ class Chip
 	setInput: (name, value) ->
 		@inputs[name] = if typeof value is 'function' then value else -> value
 
-
-chips = chipsReader.readChips()
-
-a = new Chip(chips.or)
-a.setInput 'a', [true]
-
-console.log a.outputs.out()
+exports.Chip = Chip
