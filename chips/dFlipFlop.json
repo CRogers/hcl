@@ -1,0 +1,18 @@
+({
+  name: 'dFlipFlop',
+  description: 'Saves 1 bit of state from the last clock tick',
+  inputs: {
+    d: 1
+  },
+  outputs: {
+    q: function() {
+      return [this.state.data];
+    }
+  },
+  onTick: function() {
+    return this.state.data = this.d()[0];
+  },
+  state: {
+    data: [false]
+  }
+});

@@ -24,3 +24,13 @@ fw.truthTable new Chip(chips.and, clock), 'a', 'b', 'out', [
 	[[true],	[true], 	[true]],
 
 ]
+
+
+dff = new Chip(chips.dFlipFlop, clock)
+dff.inputs.d = -> [ !dff.outputs.q()[0] ]
+
+console.log dff.outputs.q()
+
+for x in [0..10]
+	clock.advance()
+	console.log dff.outputs.q()

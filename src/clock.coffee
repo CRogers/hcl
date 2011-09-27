@@ -1,8 +1,12 @@
-class Clock
+EventEmitter = require('events').EventEmitter
+
+class Clock extends EventEmitter
 	time = 0
 	
 	time: -> time
 	
-	advance: -> time++
+	advance: ->
+		@emit 'tick', ++time
+		time
 
 exports.Clock = Clock

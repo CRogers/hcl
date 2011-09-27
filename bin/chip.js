@@ -20,7 +20,7 @@ Chip = (function() {
   var lastCalc;
   lastCalc = -1;
   function Chip(chip, clock) {
-    var func, name, pins, _ref, _ref2;
+    var func, name, pins, value, _ref, _ref2, _ref3;
     this.chip = chip;
     this.clock = clock;
     this.inputs = {};
@@ -35,6 +35,17 @@ Chip = (function() {
       func = _ref2[name];
       this.setOutput(name, func);
     }
+    this.inputs.state = {};
+    _ref3 = this.chip.state;
+    for (name in _ref3) {
+      value = _ref3[name];
+      this.setState(name, value);
+    }
+    if (this.chip.onTick) {
+      this.clock.on('tick', __bind(function() {
+        return this.chip.onTick.call(this.inputs);
+      }, this));
+    }
   }
   Chip.prototype.setOutput = function(name, func) {
     return this.outputs[name] = __bind(function() {
@@ -48,6 +59,9 @@ Chip = (function() {
       return value;
     };
     return lastCalc = -1;
+  };
+  Chip.prototype.setState = function(name, value) {
+    return this.inputs.state[name] = value;
   };
   return Chip;
 })();

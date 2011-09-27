@@ -10,18 +10,29 @@ class Chip
 	lastCalc = -1
 
 	constructor: (@chip, @clock) ->
-		
-		@inputs = {}
-		
+				
 		# Init the inputs to give all zeros
+		@inputs = {}
 		for name, pins of @chip.inputs
 			@setInput name, zeros pins
-		
-		@outputs = {}
-		
+					
+			
 		# Add the outputs to the object
+		@outputs = {}
 		for name, func of @chip.outputs
 			@setOutput name, func
+			
+		
+		# Add the state vars
+		@inputs.state = {}
+		for name, value of @chip.state
+			@setState name, value
+		
+		
+		# Set up events
+		if @chip.onTick
+			@clock.on 'tick', => @chip.onTick.call @inputs
+		
 	
 	setOutput: (name, func) ->
 		@outputs[name] = =>			
@@ -34,5 +45,8 @@ class Chip
 		
 		# Reset the cache timer as things have changed
 		lastCalc = -1
+	
+	setState: (name, value) ->
+		@inputs.state[name] = value
 
 exports.Chip = Chip
