@@ -3,7 +3,6 @@
 # See https://github.com/CRogers/FileWatcher
 
 rb="; node tools/browser_compiler.js"
-#alias haml='node node_modules/haml/lib/cli.js'
 
 filewatcher "src/" "*.coffee" "coffee -b -o bin/ -c :path$rb" "rm bin/:wefile.js$rb" &
 filewatcher "src/tests/" "*.coffee" "coffee -b -o tests/ -c :path" "rm tests/:wefile.js" &
