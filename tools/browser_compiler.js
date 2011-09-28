@@ -1,9 +1,9 @@
 var addChip, addModule, beginning, chipReader, file, fs, name, script, _i, _j, _len, _len2, _ref, _ref2;
 chipReader = require('../bin/chip-reader');
 fs = require('fs');
-beginning = "var exports = {};\nvar modules = {};\nvar requiredCache = {};\nvar chips = {};\n\nfunction require(name){\n	if(!requiredCache[name]){\n		modules[name].call(window);\n		requiredCache[name] = true;\n	}\n	return exports[name];\n}\n";
+beginning = "var exportsObj = {};\nvar modules = {};\nvar requiredCache = {};\nvar chips = {};\n\nfunction require(name){\n	\n	name = name.replace(/.*?\\//g,'').replace('.js','');\n	\n	if(!modules[name]){\n		return undefined;\n	}\n	\n	if(!requiredCache[name]){\n		modules[name].call(this);\n		requiredCache[name] = true;\n	}\n	\n	return exportsObj[name];\n}\n\n";
 addModule = function(name, code) {
-  return "modules['" + name + "'] = (function(){\n\n	var exports = exports['" + name + "'] = {}\n\n	" + code + "\n\n});\n";
+  return "modules['" + name + "'] = function(){\n\n	var exports = exportsObj['" + name + "'] = {};\n\n	" + code + "\n\n}\n";
 };
 addChip = function(name, code) {
   return "chips['" + name + "'] = " + code + ";\n";

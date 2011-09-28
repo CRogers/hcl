@@ -3,30 +3,39 @@ fs = require 'fs'
 
 beginning = 
 	"""
-	var exports = {};
+	var exportsObj = {};
 	var modules = {};
 	var requiredCache = {};
 	var chips = {};
 
 	function require(name){
+		
+		name = name.replace(/.*?\\//g,'').replace('.js','');
+		
+		if(!modules[name]){
+			return undefined;
+		}
+		
 		if(!requiredCache[name]){
-			modules[name].call(window);
+			modules[name].call(this);
 			requiredCache[name] = true;
 		}
-		return exports[name];
+		
+		return exportsObj[name];
 	}
+	
 	
 	"""
 
 addModule = (name, code) -> 
 	"""
-	modules['#{name}'] = (function(){
-
-		var exports = exports['#{name}'] = {}
+	modules['#{name}'] = function(){
+	
+		var exports = exportsObj['#{name}'] = {};
 	
 		#{code}
 
-	});
+	}
 	
 	"""
 

@@ -1,15 +1,24 @@
-var exports = {};
+var exportsObj = {};
 var modules = {};
 var requiredCache = {};
 var chips = {};
 
 function require(name){
+	
+	name = name.replace(/.*?\//g,'').replace('.js','');
+	
+	if(!modules[name]){
+		return undefined;
+	}
+	
 	if(!requiredCache[name]){
-		modules[name].call(window);
+		modules[name].call(this);
 		requiredCache[name] = true;
 	}
-	return exports[name];
+	
+	return exportsObj[name];
 }
+
 chips['and'] = ({
   name: 'and',
   description: 'Takes two inputs and applies the boolean AND operation',
@@ -87,9 +96,9 @@ chips['or'] = ({
   }
 });
 ;
-modules['chip'] = (function(){
+modules['chip'] = function(){
 
-	var exports = exports['chip'] = {}
+	var exports = exportsObj['chip'] = {};
 
 	var Chip, ones, zeros;
 var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -174,10 +183,10 @@ Chip = (function() {
 })();
 exports.Chip = Chip;
 
-});
-modules['clock'] = (function(){
+}
+modules['clock'] = function(){
 
-	var exports = exports['clock'] = {}
+	var exports = exportsObj['clock'] = {};
 
 	var Clock, EventEmitter;
 var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
@@ -207,4 +216,4 @@ Clock = (function() {
 })();
 exports.Clock = Clock;
 
-});
+}
