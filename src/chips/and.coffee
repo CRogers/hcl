@@ -1,9 +1,14 @@
 {
 	name: 'and'
 	description: 'Takes two inputs and applies the boolean AND operation'
+	generics:
+		x: 1
 	inputs:
-		a: 1
-		b: 1
+		a: 'x'
+		b: 'x'
 	outputs:
-		out: -> [@inputs.a()[0] && @inputs.b()[0]]
+		out: -> 
+			a = @inputs.a()
+			b = @inputs.b()
+			(a[i] && b[i] for i in [0...@generics.x])
 }
