@@ -28,7 +28,7 @@ chips['and'] = ({
   },
   outputs: {
     out: function() {
-      return [a()[0] && b()[0]];
+      return [this.inputs.a()[0] && this.inputs.b()[0]];
     }
   }
 });
@@ -71,7 +71,7 @@ chips['or'] = ({
   },
   outputs: {
     out: function() {
-      return [a()[0] || b()[0]];
+      return [this.inputs.a()[0] || this.inputs.b()[0]];
     }
   }
 });
@@ -99,8 +99,10 @@ ones = function(size) {
   return _results;
 };
 Chip = (function() {
-  var lastCalc;
+  var internal, lastCalc, outputCache;
   lastCalc = -1;
+  internal = void 0;
+  outputCache = {};
   function Chip(chip, clock, generics) {
     var func, name, pins, value, _base, _ref, _ref2, _ref3;
     this.chip = chip;
@@ -113,7 +115,7 @@ Chip = (function() {
     for (name in this.chip.generics) {
       (_base = this.generics)[name] || (_base[name] = this.chip.generics[name]);
     }
-    this.internal = {
+    internal = {
       inputs: this.inputs,
       state: this.state,
       generics: this.generics
@@ -134,20 +136,21 @@ Chip = (function() {
     _ref3 = this.chip.state;
     for (name in _ref3) {
       value = _ref3[name];
-      this.setState(name, value.call(this.internal));
+      this.setState(name, value.call(internal));
     }
     if (this.chip.onTick) {
       this.clock.on('tick', __bind(function() {
-        return this.chip.onTick.call(this.internal);
+        return this.chip.onTick.call(internal);
       }, this));
     }
-    console.log(this);
   }
   Chip.prototype.setOutput = function(name, func) {
     return this.outputs[name] = __bind(function() {
       if (lastCalc < this.clock.time()) {
-        func.call(this.internal);
-        return lastCalc = this.clock.time();
+        lastCalc = this.clock.time();
+        return outputCache[name] = func.call(internal);
+      } else {
+        return outputCache[name];
       }
     }, this);
   };
@@ -178,7 +181,7 @@ var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, par
   child.__super__ = parent.prototype;
   return child;
 };
-EventEmitter = require('events').EventEmitter;
+EventEmitter = require('./events').EventEmitter;
 Clock = (function() {
   var time;
   __extends(Clock, EventEmitter);
@@ -191,10 +194,43 @@ Clock = (function() {
   };
   Clock.prototype.advance = function() {
     this.emit('tick', ++time);
-    return time;
+    return ++time;
   };
   return Clock;
 })();
 exports.Clock = Clock;
+
+}
+modules['events'] = function(){
+
+	var exports = exportsObj['events'] = {};
+
+	var EventEmitter;
+var __slice = Array.prototype.slice;
+EventEmitter = (function() {
+  function EventEmitter() {
+    this._events = {};
+  }
+  EventEmitter.prototype.on = function(name, callback) {
+    var _base;
+    (_base = this._events)[name] || (_base[name] = []);
+    return this._events[name].push(callback);
+  };
+  EventEmitter.prototype.emit = function() {
+    var args, callback, name, _i, _len, _ref, _results;
+    name = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+    if (this._events[name]) {
+      _ref = this._events[name];
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        callback = _ref[_i];
+        _results.push(callback(args));
+      }
+      return _results;
+    }
+  };
+  return EventEmitter;
+})();
+exports.EventEmitter = EventEmitter;
 
 }

@@ -5,5 +5,5 @@
 		a: 1
 		b: 1
 	outputs:
-		out: -> [ a()[0] || b()[0] ]
+		out: -> [ @inputs.a()[0] || @inputs.b()[0] ]
 }

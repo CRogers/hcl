@@ -7,7 +7,7 @@ var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, par
   child.__super__ = parent.prototype;
   return child;
 };
-EventEmitter = require('events').EventEmitter;
+EventEmitter = require('./events').EventEmitter;
 Clock = (function() {
   var time;
   __extends(Clock, EventEmitter);
@@ -20,7 +20,7 @@ Clock = (function() {
   };
   Clock.prototype.advance = function() {
     this.emit('tick', ++time);
-    return time;
+    return ++time;
   };
   return Clock;
 })();

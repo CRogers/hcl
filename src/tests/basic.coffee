@@ -31,9 +31,9 @@ dff.inputs.d = -> [ !dff.outputs.q()[0] ]
 
 fw.truthTable dff, 'q', [[[false]],[[true]],[[false]],[[true]]]
 
-
 dff = new Chip(chips.dFlipFlop, clock, {x: 3})
-dff.inputs.d = -> (!x for x in dff.outputs.q())
+dff.inputs.d = ->
+	(!x for x in dff.outputs.q())
 
 fw.truthTable dff, 'q', [
 

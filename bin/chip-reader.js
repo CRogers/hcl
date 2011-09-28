@@ -24,6 +24,7 @@ exports.loadChips = loadChips = function(chipNames, dir) {
   chips = {};
   for (_i = 0, _len = chipNames.length; _i < _len; _i++) {
     name = chipNames[_i];
+    console.log("" + dir + "/" + name)
     chips[name.slice(0, -5)] = eval(fs.readFileSync("" + dir + "/" + name, 'utf8'));
   }
   return chips;

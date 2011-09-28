@@ -8,6 +8,8 @@ ones = (size) ->
 class Chip
 
 	lastCalc = -1
+	internal = undefined
+	outputCache = {}
 
 	constructor: (@chip, @clock, @generics) ->
 		
@@ -22,7 +24,7 @@ class Chip
 			@generics[name] ||= @chip.generics[name]
 		
 		# Add an internal object linking sandboxing just what is needed for the chip file to use
-		@internal =
+		internal =
 			inputs: @inputs
 			state: @state
 			generics: @generics
@@ -44,20 +46,20 @@ class Chip
 		
 		# Add the state vars
 		for name, value of @chip.state
-			@setState name, value.call @internal
+			@setState name, value.call internal
 		
 		# Set up events
 		if @chip.onTick
-			@clock.on 'tick', => @chip.onTick.call @internal
-		
-		console.log this
+			@clock.on 'tick', => @chip.onTick.call internal
 	
 	setOutput: (name, func) ->
 		@outputs[name] = =>			
 			# See if we have already calculated the value this tick and only calculate if necessary
 			if lastCalc < @clock.time()
-				func.call @internal
 				lastCalc = @clock.time()
+				outputCache[name] = func.call internal
+			else
+				outputCache[name]
 	
 	setInput: (name, value) ->
 		@inputs[name] = if typeof value is 'function' then value else -> value
@@ -67,5 +69,6 @@ class Chip
 	
 	setState: (name, value) ->
 		@state[name] = value
+		
 
 exports.Chip = Chip

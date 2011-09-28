@@ -7,7 +7,7 @@
   },
   outputs: {
     out: function() {
-      return [a()[0] || b()[0]];
+      return [this.inputs.a()[0] || this.inputs.b()[0]];
     }
   }
 });
