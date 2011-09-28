@@ -25,6 +25,7 @@ exports.truthTable = function(chip, inputs, outputs, tests) {
       success = arrayEqual(chip.outputs[output](), expected);
       out = "" + output + ":" + expected + "; ";
       puts(success ? colors.green(out) : colors.red(out));
+      allPassed && (allPassed = success);
     }
     console.log('  ' + (allPassed ? 'success'.green : 'failure'.red));
     chip.clock.advance();

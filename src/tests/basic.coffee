@@ -26,6 +26,24 @@ fw.truthTable new Chip(chips.and, clock), ['a', 'b'], ['out'], [
 ]
 
 
+jo = new Chip(chips.joiner, clock, {aw: 3, bw: 5})
+
+fw.truthTable jo, ['a','b'], ['out'], [
+
+	[[[true,false,false], [true,true,true,false,true]], [[true,false,false,true,true,true,false,true]]]
+
+]
+
+
+sp = new Chip(chips.splitter, clock, {width: 6, start: 1, end: 3})
+
+fw.truthTable sp, ['bus'], ['low','mid','high'], [
+
+	[[[true,false,false,true,false,true]], [[true], [false,false,true], [false,true]]]
+
+]
+
+
 dff = new Chip(chips.dFlipFlop, clock)
 dff.inputs.d = -> [ !dff.outputs.q()[0] ]
 
@@ -48,15 +66,5 @@ fw.truthTable dff, [], ['q'], [
 	[[], [[true, true, true]]],
 	[[], [[false, false, false]]],
 	[[], [[true, true, true]]],
-
-]
-
-
-
-sp = new Chip(chips.splitter, clock, {width: 6, start: 1, end: 3})
-
-fw.truthTable sp, ['bus'], ['low','mid','high'], [
-
-	[[[true,false,false,true,false,true]], [[true], [false,false,true], [false,true]]]
 
 ]

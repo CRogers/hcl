@@ -62,6 +62,24 @@ chips['dFlipFlop'] = ({
   }
 });
 ;
+chips['joiner'] = ({
+  name: 'joiner',
+  description: 'Joins 2 smaller buses into one larger bus',
+  generics: {
+    aw: 8,
+    bw: 8
+  },
+  inputs: {
+    a: 'aw',
+    b: 'bw'
+  },
+  outputs: {
+    out: function() {
+      return this.inputs.a().concat(this.inputs.b());
+    }
+  }
+});
+;
 chips['or'] = ({
   name: 'or',
   description: 'Takes two inputs and applies the boolean OR operation',

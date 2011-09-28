@@ -25,6 +25,7 @@ exports.truthTable = (chip, inputs, outputs, tests) ->
 			success = arrayEqual chip.outputs[output](), expected
 			out = "#{output}:#{expected}; "
 			puts if success then colors.green out else colors.red out
+			allPassed &&= success
 		
 		console.log '  ' + if allPassed then 'success'.green else 'failure'.red
 		
