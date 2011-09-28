@@ -17,6 +17,7 @@ class Chip
 		@state = {}
 		@generics ||= {}
 		
+		# Use the generic value provided or go for the default
 		for name of @chip.generics
 			@generics[name] ||= @chip.generics[name]
 		
@@ -31,7 +32,7 @@ class Chip
 		
 			# Check for generics
 			if typeof pins is 'string'
-				pins = @generics?[pins] ? @chip.generics[pins]
+				pins = @generics[pins]
 			
 			@setInput name, zeros pins
 					
@@ -48,7 +49,8 @@ class Chip
 		# Set up events
 		if @chip.onTick
 			@clock.on 'tick', => @chip.onTick.call @internal
-			
+		
+		console.log this
 	
 	setOutput: (name, func) ->
 		@outputs[name] = =>			
