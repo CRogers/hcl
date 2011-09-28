@@ -1,8 +1,11 @@
 ({
   name: 'dFlipFlop',
   description: 'Saves 1 bit of state from the last clock tick',
+  generics: {
+    x: 1
+  },
   inputs: {
-    d: 1
+    d: 'x'
   },
   outputs: {
     q: function() {
@@ -10,9 +13,16 @@
     }
   },
   onTick: function() {
-    return this.state.data = this.d();
+    return this.state.data = this.inputs.d();
   },
   state: {
-    data: [false]
+    data: function() {
+      var i, _ref, _results;
+      _results = [];
+      for (i = 0, _ref = this.generics.x; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
+        _results.push(false);
+      }
+      return _results;
+    }
   }
 });
