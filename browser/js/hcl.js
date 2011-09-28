@@ -22,23 +22,13 @@ function require(name){
 chips['and'] = ({
   name: 'and',
   description: 'Takes two inputs and applies the boolean AND operation',
-  generics: {
-    x: 1
-  },
   inputs: {
-    a: 'x',
-    b: 'x'
+    a: 1,
+    b: 1
   },
   outputs: {
     out: function() {
-      var a, b, i, _ref, _results;
-      a = this.inputs.a();
-      b = this.inputs.b();
-      _results = [];
-      for (i = 0, _ref = this.generics.x; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
-        _results.push(a[i] && b[i]);
-      }
-      return _results;
+      return [a()[0] && b()[0]];
     }
   }
 });
@@ -75,23 +65,13 @@ chips['dFlipFlop'] = ({
 chips['or'] = ({
   name: 'or',
   description: 'Takes two inputs and applies the boolean OR operation',
-  generics: {
-    x: 1
-  },
   inputs: {
-    a: 'x',
-    b: 'x'
+    a: 1,
+    b: 1
   },
   outputs: {
     out: function() {
-      var a, b, i, _ref, _results;
-      a = this.inputs.a();
-      b = this.inputs.b();
-      _results = [];
-      for (i = 0, _ref = this.generics.x; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
-        _results.push(a[i] || b[i]);
-      }
-      return _results;
+      return [a()[0] || b()[0]];
     }
   }
 });
@@ -166,7 +146,8 @@ Chip = (function() {
   Chip.prototype.setOutput = function(name, func) {
     return this.outputs[name] = __bind(function() {
       if (lastCalc < this.clock.time()) {
-        return func.call(this.internal);
+        func.call(this.internal);
+        return lastCalc = this.clock.time();
       }
     }, this);
   };
