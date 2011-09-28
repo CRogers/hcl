@@ -64,7 +64,8 @@ Chip = (function() {
   Chip.prototype.setOutput = function(name, func) {
     return this.outputs[name] = __bind(function() {
       if (lastCalc < this.clock.time()) {
-        return func.call(this.internal);
+        func.call(this.internal);
+        return lastCalc = this.clock.time();
       }
     }, this);
   };

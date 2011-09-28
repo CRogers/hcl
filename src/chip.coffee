@@ -57,6 +57,7 @@ class Chip
 			# See if we have already calculated the value this tick and only calculate if necessary
 			if lastCalc < @clock.time()
 				func.call @internal
+				lastCalc = @clock.time()
 	
 	setInput: (name, value) ->
 		@inputs[name] = if typeof value is 'function' then value else -> value
