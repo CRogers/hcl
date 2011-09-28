@@ -1,0 +1,23 @@
+({
+  name: 'splitter',
+  description: 'Slices up a bus into smaller buses',
+  generics: {
+    start: 2,
+    end: 4,
+    width: 8
+  },
+  inputs: {
+    bus: 'width'
+  },
+  outputs: {
+    low: function() {
+      return this.inputs.bus().slice(0, this.generics.start);
+    },
+    mid: function() {
+      return this.inputs.bus().slice(this.generics.start, (this.generics.end + 1) || 9e9);
+    },
+    high: function() {
+      return this.inputs.bus().slice(this.generics.end + 1, this.generics.width);
+    }
+  }
+});
