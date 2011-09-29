@@ -1,6 +1,7 @@
 ({
   name: 'splitter',
   description: 'Slices up a bus into smaller buses',
+  color: 'teal',
   generics: {
     start: 2,
     end: 4,

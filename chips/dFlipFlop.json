@@ -1,6 +1,7 @@
 ({
   name: 'dFlipFlop',
   description: 'Saves 1 bit of state from the last clock tick',
+  color: 'blue',
   generics: {
     x: 1
   },
