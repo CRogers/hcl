@@ -8,16 +8,21 @@ var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, par
   return child;
 };
 Chip = require('chip').Chip;
-$(function() {
-  var circle, move, paper, start;
+$(window).load(function() {
+  var circle, end, move, paper, start;
   paper = Raphael('canvasarea', '100%', '100%');
-  circle = paper.circle(150, 150, 100).attr({
+  circle = paper.circle(150, 150, 50).attr({
     fill: '#f00',
-    stroke: '#fff'
+    stroke: '#fff',
+    opacity: 0.5
   });
   start = function() {
     this.ox = this.attr('cx');
-    return this.oy = this.attr('cy');
+    this.oy = this.attr('cy');
+    return this.animate({
+      r: 70,
+      opacity: .25
+    }, 500, ">");
   };
   move = function(dx, dy) {
     return this.attr({
@@ -25,7 +30,13 @@ $(function() {
       cy: this.oy + dy
     });
   };
-  return circle.drag(start, move, function() {});
+  end = function() {
+    return this.animate({
+      r: 50,
+      opacity: .5
+    }, 500, ">");
+  };
+  return circle.drag(move, start, end);
 });
 GrahpicChip = (function() {
   __extends(GrahpicChip, Chip);
