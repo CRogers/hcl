@@ -49,9 +49,7 @@ class GrahpicChip extends Chip
 	 		fill: @chip.color
 	 		'fill-opacity': 0.05
 	 		stroke: @chip.color
-	 		'stroke-width': 2
-	 			 	
-	 	console.log rect	
+	 		'stroke-width': 2	
 	 		
 	 	name = paper.text(@x+25, @y+15, @chip.name).attr
 	 		'font-size': 12

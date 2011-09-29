@@ -65,7 +65,6 @@ GrahpicChip = (function() {
       stroke: this.chip.color,
       'stroke-width': 2
     });
-    console.log(rect);
     name = paper.text(this.x + 25, this.y + 15, this.chip.name).attr({
       'font-size': 12,
       'fill': 'white'
