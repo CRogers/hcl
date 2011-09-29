@@ -3,7 +3,7 @@ body {
 
 #sidebar {
   position: absolute;
-  background: orange;
+  background: #444444;
   width: 200px;
   left: 0;
   top: 0;
@@ -11,6 +11,7 @@ body {
 
 #canvasarea {
   position: absolute;
+  background: #333333;
   margin-bottom: 200px;
   margin-left: 200px;
   top: 0;
@@ -20,7 +21,7 @@ body {
 
 #bottombar {
   position: absolute;
-  background: purple;
+  background: #555555;
   height: 200px;
   margin-left: 200px;
   bottom: 0;

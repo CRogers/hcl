@@ -22,6 +22,7 @@ function require(name){
 chips['and'] = ({
   name: 'and',
   description: 'Takes two inputs and applies the boolean AND operation',
+  color: 'red',
   inputs: {
     a: 1,
     b: 1
@@ -36,6 +37,7 @@ chips['and'] = ({
 chips['dFlipFlop'] = ({
   name: 'dFlipFlop',
   description: 'Saves 1 bit of state from the last clock tick',
+  color: 'blue',
   generics: {
     x: 1
   },
@@ -65,6 +67,7 @@ chips['dFlipFlop'] = ({
 chips['joiner'] = ({
   name: 'joiner',
   description: 'Joins 2 smaller buses into one larger bus',
+  color: 'blue',
   generics: {
     aw: 8,
     bw: 8
@@ -83,6 +86,7 @@ chips['joiner'] = ({
 chips['or'] = ({
   name: 'or',
   description: 'Takes two inputs and applies the boolean OR operation',
+  color: 'orange',
   inputs: {
     a: 1,
     b: 1
@@ -97,6 +101,7 @@ chips['or'] = ({
 chips['splitter'] = ({
   name: 'splitter',
   description: 'Slices up a bus into smaller buses',
+  color: 'teal',
   generics: {
     start: 2,
     end: 4,

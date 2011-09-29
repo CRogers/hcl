@@ -1,4 +1,4 @@
-var Chip, Clock, GrahpicChip, hline;
+var Chip, Clock, GrahpicChip, danimate, hline, rscale;
 var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
   for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
   function ctor() { this.constructor = child; }
@@ -9,15 +9,34 @@ var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, par
 };
 Chip = require('chip').Chip;
 Clock = require('clock').Clock;
-$(window).load(function() {
-  var a, clock, paper;
-  paper = Raphael('canvasarea', '100%', '100%').draggable.enable();
+$(function() {
+  var a, clock, o;
+  window.paper = Raphael('canvasarea', '100%', '100%').draggable.enable();
   clock = new Clock();
   a = new GrahpicChip(chips.and, clock);
-  return a.createSvg(paper, 50, 50);
+  a.createSvg(paper, 50, 50);
+  o = new GrahpicChip(chips.or, clock);
+  return o.createSvg(paper, 100, 50);
 });
 hline = function(paper, x, y, width) {
   return paper.path("M" + x + " " + y + "L" + (x + width) + " " + y);
+};
+danimate = function(obj, attrs, time, type) {
+  var k, newAttrs, v;
+  newAttrs = {};
+  for (k in attrs) {
+    v = attrs[k];
+    newAttrs[k] = obj.attr(k) + v;
+  }
+  return obj.animate(newAttrs, time, type);
+};
+rscale = function(rect, d, time, type) {
+  return danimate(rect, {
+    x: -d,
+    y: -d,
+    width: 2 * d,
+    height: 2 * d
+  }, time, type);
 };
 GrahpicChip = (function() {
   __extends(GrahpicChip, Chip);
@@ -25,14 +44,21 @@ GrahpicChip = (function() {
     GrahpicChip.__super__.constructor.apply(this, arguments);
   }
   GrahpicChip.prototype.createSvg = function(paper, x, y) {
-    var all, i, input, inputLines, name, output, outputLines, rect;
+    var all, height, i, input, inputLines, name, output, outputLines, rect, width;
     this.x = x;
     this.y = y;
-    rect = paper.rect(this.x, this.y, 50, 50).attr({
-      fill: '#fff'
+    width = 50;
+    height = 50;
+    rect = paper.rect(this.x, this.y, width, height, 15).attr({
+      fill: this.chip.color,
+      'fill-opacity': 0.05,
+      stroke: this.chip.color,
+      'stroke-width': 2
     });
+    console.log(rect);
     name = paper.text(this.x + 25, this.y + 15, this.chip.name).attr({
-      'font-size': 12
+      'font-size': 12,
+      'fill': 'white'
     });
     i = 0;
     inputLines = [];
@@ -42,12 +68,23 @@ GrahpicChip = (function() {
     i = 0;
     outputLines = [];
     for (output in this.outputs) {
-      outputLines.push(hline(paper, this.x + 50, y + 20 + i++ * 10, -10));
+      outputLines.push(hline(paper, this.x + width, y + 20 + i++ * 10, -10));
     }
     all = paper.set().draggable.enable();
     all.push(rect, name);
     all.push.apply(this, inputLines);
-    return all.push.apply(this, outputLines);
+    all.push.apply(this, outputLines);
+    all.attr('cursor', 'move');
+    all.draggable.onstartdrag = function() {
+      return rect.animate({
+        'fill-opacity': 0.2
+      }, 500, '>');
+    };
+    return all.draggable.onenddrag = function() {
+      return rect.animate({
+        'fill-opacity': 0.05
+      }, 500, '>');
+    };
   };
   return GrahpicChip;
 })();
