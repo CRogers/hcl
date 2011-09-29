@@ -1,0 +1,29 @@
+body {
+  position: relative; }
+
+#sidebar {
+  position: absolute;
+  background: orange;
+  width: 200px;
+  left: 0;
+  top: 0;
+  bottom: 0; }
+
+#canvasarea {
+  position: absolute;
+  background: green;
+  margin-bottom: 200px;
+  margin-left: 200px;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0; }
+
+#bottombar {
+  position: absolute;
+  background: purple;
+  height: 200px;
+  margin-left: 200px;
+  bottom: 0;
+  right: 0;
+  left: 0; }
