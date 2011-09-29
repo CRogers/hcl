@@ -1,6 +1,7 @@
 {
 	name: 'or'
 	description: 'Takes two inputs and applies the boolean OR operation'
+	color: 'orange'
 	inputs:
 		a: 1
 		b: 1
