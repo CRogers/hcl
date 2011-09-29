@@ -1,4 +1,4 @@
-var Chip, GrahpicChip;
+var Chip, Clock, GrahpicChip, hline;
 var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
   for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
   function ctor() { this.constructor = child; }
@@ -8,41 +8,46 @@ var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, par
   return child;
 };
 Chip = require('chip').Chip;
+Clock = require('clock').Clock;
 $(window).load(function() {
-  var circle, end, move, paper, start;
-  paper = Raphael('canvasarea', '100%', '100%');
-  circle = paper.circle(150, 150, 50).attr({
-    fill: '#f00',
-    stroke: '#fff',
-    opacity: 0.5
-  });
-  start = function() {
-    this.ox = this.attr('cx');
-    this.oy = this.attr('cy');
-    return this.animate({
-      r: 70,
-      opacity: .25
-    }, 500, ">");
-  };
-  move = function(dx, dy) {
-    return this.attr({
-      cx: this.ox + dx,
-      cy: this.oy + dy
-    });
-  };
-  end = function() {
-    return this.animate({
-      r: 50,
-      opacity: .5
-    }, 500, ">");
-  };
-  return circle.drag(move, start, end);
+  var a, clock, paper;
+  paper = Raphael('canvasarea', '100%', '100%').draggable.enable();
+  clock = new Clock();
+  a = new GrahpicChip(chips.and, clock);
+  return a.createSvg(paper, 50, 50);
 });
+hline = function(paper, x, y, width) {
+  return paper.path("M" + x + " " + y + "L" + (x + width) + " " + y);
+};
 GrahpicChip = (function() {
   __extends(GrahpicChip, Chip);
   function GrahpicChip() {
-    this.x = 0;
-    this.y = 0;
+    GrahpicChip.__super__.constructor.apply(this, arguments);
   }
+  GrahpicChip.prototype.createSvg = function(paper, x, y) {
+    var all, i, input, inputLines, name, output, outputLines, rect;
+    this.x = x;
+    this.y = y;
+    rect = paper.rect(this.x, this.y, 50, 50).attr({
+      fill: '#fff'
+    });
+    name = paper.text(this.x + 25, this.y + 15, this.chip.name).attr({
+      'font-size': 12
+    });
+    i = 0;
+    inputLines = [];
+    for (input in this.inputs) {
+      inputLines.push(hline(paper, this.x, this.y + 20 + i++ * 10, 10));
+    }
+    i = 0;
+    outputLines = [];
+    for (output in this.outputs) {
+      outputLines.push(hline(paper, this.x + 50, y + 20 + i++ * 10, -10));
+    }
+    all = paper.set().draggable.enable();
+    all.push(rect, name);
+    all.push.apply(this, inputLines);
+    return all.push.apply(this, outputLines);
+  };
   return GrahpicChip;
 })();

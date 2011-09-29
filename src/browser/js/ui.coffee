@@ -1,33 +1,44 @@
 Chip = require('chip').Chip
+Clock = require('clock').Clock
 
 $(window).load ->
 
-	paper = Raphael('canvasarea', '100%', '100%')
-
-	circle = paper.circle(150, 150, 50).attr
-		fill: '#f00'
-		stroke: '#fff'
-		opacity: 0.5
+	paper = Raphael('canvasarea', '100%', '100%').draggable.enable()
 	
-	start = ->
-		@ox = @attr 'cx'
-		@oy = @attr 'cy'
-		@animate {r: 70, opacity: .25}, 500, ">"
+	clock = new Clock()
 	
-	move = (dx,dy) ->
-		@attr
-			cx: @ox + dx
-			cy: @oy + dy
-	
-	end = ->
-		@animate {r: 50, opacity: .5}, 500, ">"
-	
-	circle.drag(move, start, end)
+	a = new GrahpicChip(chips.and, clock)
+	a.createSvg paper, 50, 50
 	
 
-class GrahpicChip extends Chip
-	
-	 constructor: ->
-	 	@x = 0
-	 	@y = 0
+hline = (paper, x, y, width) ->
+	paper.path "M#{x} #{y}L#{x+width} #{y}"
+
+
+class GrahpicChip extends Chip	 	
+	 
+	 createSvg: (paper, @x, @y) ->
 	 	
+	 	rect = paper.rect(@x, @y, 50, 50).attr
+	 		fill: '#fff'
+	 		
+	 	name = paper.text(@x+25, @y+15, @chip.name).attr
+	 		'font-size': 12
+	 	
+	 	i = 0
+	 	inputLines = []
+	 	for input of @inputs
+	 		inputLines.push hline paper, @x, @y+20+i++*10, 10
+	 	
+	 	i = 0
+	 	outputLines = []
+	 	for output of @outputs
+	 		outputLines.push hline paper, @x+50, y+20+i++*10, -10
+	 	
+	 	
+	 	all = paper.set().draggable.enable()
+	 	all.push(rect, name)
+	 	all.push.apply this, inputLines
+	 	all.push.apply this, outputLines
+	 		
+	 			 		
