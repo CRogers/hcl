@@ -49,6 +49,16 @@ GrahpicChip = (function() {
     this.y = y;
     width = 50;
     height = 50;
+    i = 0;
+    inputLines = [];
+    for (input in this.inputs) {
+      inputLines.push(hline(paper, this.x, this.y + 20 + i++ * 10, 10));
+    }
+    i = 0;
+    outputLines = [];
+    for (output in this.outputs) {
+      outputLines.push(hline(paper, this.x + width, y + 20 + i++ * 10, -10));
+    }
     rect = paper.rect(this.x, this.y, width, height, 15).attr({
       fill: this.chip.color,
       'fill-opacity': 0.05,
@@ -60,16 +70,6 @@ GrahpicChip = (function() {
       'font-size': 12,
       'fill': 'white'
     });
-    i = 0;
-    inputLines = [];
-    for (input in this.inputs) {
-      inputLines.push(hline(paper, this.x, this.y + 20 + i++ * 10, 10));
-    }
-    i = 0;
-    outputLines = [];
-    for (output in this.outputs) {
-      outputLines.push(hline(paper, this.x + width, y + 20 + i++ * 10, -10));
-    }
     all = paper.set().draggable.enable();
     all.push(rect, name);
     all.push.apply(this, inputLines);

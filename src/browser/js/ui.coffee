@@ -35,6 +35,16 @@ class GrahpicChip extends Chip
 	 	width = 50
 	 	height = 50
 	 	
+	 	i = 0
+	 	inputLines = []
+	 	for input of @inputs
+	 		inputLines.push hline paper, @x, @y+20+i++*10, 10
+	 	
+	 	i = 0
+	 	outputLines = []
+	 	for output of @outputs
+	 		outputLines.push hline paper, @x+width, y+20+i++*10, -10
+	 	
 	 	rect = paper.rect(@x, @y, width, height, 15).attr
 	 		fill: @chip.color
 	 		'fill-opacity': 0.05
@@ -46,16 +56,6 @@ class GrahpicChip extends Chip
 	 	name = paper.text(@x+25, @y+15, @chip.name).attr
 	 		'font-size': 12
 	 		'fill': 'white'
-	 	
-	 	i = 0
-	 	inputLines = []
-	 	for input of @inputs
-	 		inputLines.push hline paper, @x, @y+20+i++*10, 10
-	 	
-	 	i = 0
-	 	outputLines = []
-	 	for output of @outputs
-	 		outputLines.push hline paper, @x+width, y+20+i++*10, -10
 	 	
 	 	
 	 	all = paper.set().draggable.enable()
