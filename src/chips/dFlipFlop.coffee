@@ -8,6 +8,7 @@
 		d: 'x'
 	outputs:
 		q: -> @state.data
+		nq: -> !@state.data
 	onTick: ->	@state.data = @inputs.d()
 	state:
 		data: -> (false for i in [0...@generics.x])

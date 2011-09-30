@@ -47,6 +47,9 @@ chips['dFlipFlop'] = ({
   outputs: {
     q: function() {
       return this.state.data;
+    },
+    nq: function() {
+      return !this.state.data;
     }
   },
   onTick: function() {
