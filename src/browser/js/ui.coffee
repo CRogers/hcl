@@ -21,21 +21,6 @@ $ ->
 
 Raphael.fn.hline = (x, y, width) ->
 	@path "M#{x} #{y}L#{x+width} #{y}"
-
-danimate = (obj, attrs, time, type) ->
-	newAttrs = {}
-	for k,v of attrs
-		newAttrs[k] = obj.attr(k) + v
-		
-	obj.animate newAttrs, time, type
-
-rscale = (rect, d, time, type) ->
-	danimate rect, {x: -d, y: -d, width: 2*d, height: 2*d}, time, type
-
-
-setPushArr = (set, arrs...) ->
-	for arr in arrs
-		set.push.apply this, arr
 		
 Raphael.fn.textAlign = (x, y, str, halign = 'center', valign = 'center') ->
 	text = @text x, y, str

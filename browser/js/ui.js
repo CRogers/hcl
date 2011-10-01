@@ -1,5 +1,5 @@
-var Chip, Clock, Connector, GrahpicChip, danimate, pathFormat, rscale, setPushArr;
-var __slice = Array.prototype.slice, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
+var Chip, Clock, Connector, GrahpicChip, pathFormat;
+var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
   for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
   function ctor() { this.constructor = child; }
   ctor.prototype = parent.prototype;
@@ -27,33 +27,6 @@ $(function() {
 });
 Raphael.fn.hline = function(x, y, width) {
   return this.path("M" + x + " " + y + "L" + (x + width) + " " + y);
-};
-danimate = function(obj, attrs, time, type) {
-  var k, newAttrs, v;
-  newAttrs = {};
-  for (k in attrs) {
-    v = attrs[k];
-    newAttrs[k] = obj.attr(k) + v;
-  }
-  return obj.animate(newAttrs, time, type);
-};
-rscale = function(rect, d, time, type) {
-  return danimate(rect, {
-    x: -d,
-    y: -d,
-    width: 2 * d,
-    height: 2 * d
-  }, time, type);
-};
-setPushArr = function() {
-  var arr, arrs, set, _i, _len, _results;
-  set = arguments[0], arrs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-  _results = [];
-  for (_i = 0, _len = arrs.length; _i < _len; _i++) {
-    arr = arrs[_i];
-    _results.push(set.push.apply(this, arr));
-  }
-  return _results;
 };
 Raphael.fn.textAlign = function(x, y, str, halign, valign) {
   var bb, dh, dw, text;
