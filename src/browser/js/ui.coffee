@@ -19,7 +19,8 @@ $ ->
 	o = new GrahpicChip(chips.dFlipFlop, clock)
 	o.createSvg paper, 200, 50
 	
-	#c = new Connector(paper, {chip:a, pin:'out'}, {chip:o, pin:'d'})
+	c = new Connector(paper, {chip:a, pin:'out'}, {chip:o, pin:'d'})
+	#c.unlink()
 	
 
 Raphael.fn.hline = (x, y, width) ->
@@ -69,8 +70,9 @@ class Connector
 	updateStart: (@start) -> @update()
 	updateEnd: (@end) -> @update()		
 		
-	link: (type, obj, pin, noUpdate) ->
-		link = obj.link[type]
+	linkStart: (@startLink, noUpdate) ->
+		pin = @startLink.pin
+		link = @startLink.chip.link.outputs
 		
 		if not link[pin]
 			link[pin] = []
@@ -79,13 +81,38 @@ class Connector
 			link[pin].push this
 		
 		if not noUpdate
-			obj.svg.set.draggable.onmovedrag()
-	
-	linkStart: (@startLink, noUpdate) -> 
-		@link 'outputs', @startLink.chip, @startLink.pin
+			@startLink.chip.svg.set.draggable.onmovedrag()
 		
-	linkEnd:   (@endLink, noUpdate) -> 
-		@link 'inputs', @endLink.chip, @endLink.pin
+	linkEnd: (@endLink, noUpdate) -> 
+		pin = @endLink.pin
+		link = @endLink.chip.link.inputs
+		
+		if link[pin] and link[pin] != this
+			link[pin].unlink()
+		
+		link[pin] = this
+		
+		if not noUpdate
+			@endLink.chip.svg.set.draggable.onmovedrag()
+	
+	unlink: ->
+		@unlinkStart()
+		@unlinkEnd()
+		@svg.remove()
+	
+	unlinkStart: ->
+		
+		link = @startLink.chip.link.outputs
+		pin = @startLink.pin
+		if link[pin]
+			index = link[pin].indexOf this
+			if index isnt -1
+				link[pin].splice index, 1
+	
+	unlinkEnd: ->
+		delete @startLink.chip.link.inputs[@startLink.pin]
+			 
+					
 	
 class GrahpicChip extends Chip		
 	
@@ -220,8 +247,8 @@ class GrahpicChip extends Chip
 			@y = rect.attr 'y'
 		
 			# Loop through each list of links from each pin and update it's position
-			for linkName, connectors of @link.inputs
-				for connector in connectors
+			for linkName, connector of @link.inputs
+				if connector
 					connector.updateEnd {x: @x, y: @y + @pinPos.inputs[linkName]}
 			
 			for linkName, connectors of @link.outputs

@@ -12,13 +12,20 @@ Clock = require('clock').Clock;
 uiMode = 'normal';
 connectorStart = null;
 $(function() {
-  var a, clock, o, paper;
+  var a, c, clock, o, paper;
   window.pppaper = paper = Raphael('canvasarea', '100%', '100%').draggable.enable();
   clock = new Clock();
   a = new GrahpicChip(chips.and, clock);
   a.createSvg(paper, 50, 50);
   o = new GrahpicChip(chips.dFlipFlop, clock);
-  return o.createSvg(paper, 200, 50);
+  o.createSvg(paper, 200, 50);
+  return c = new Connector(paper, {
+    chip: a,
+    pin: 'out'
+  }, {
+    chip: o,
+    pin: 'd'
+  });
 });
 Raphael.fn.hline = function(x, y, width) {
   return this.path("M" + x + " " + y + "L" + (x + width) + " " + y);
@@ -90,9 +97,11 @@ Connector = (function() {
     this.end = end;
     return this.update();
   };
-  Connector.prototype.link = function(type, obj, pin, noUpdate) {
-    var link;
-    link = obj.link[type];
+  Connector.prototype.linkStart = function(startLink, noUpdate) {
+    var link, pin;
+    this.startLink = startLink;
+    pin = this.startLink.pin;
+    link = this.startLink.chip.link.outputs;
     if (!link[pin]) {
       link[pin] = [];
     }
@@ -100,16 +109,40 @@ Connector = (function() {
       link[pin].push(this);
     }
     if (!noUpdate) {
-      return obj.svg.set.draggable.onmovedrag();
+      return this.startLink.chip.svg.set.draggable.onmovedrag();
     }
   };
-  Connector.prototype.linkStart = function(startLink, noUpdate) {
-    this.startLink = startLink;
-    return this.link('outputs', this.startLink.chip, this.startLink.pin);
-  };
   Connector.prototype.linkEnd = function(endLink, noUpdate) {
+    var link, pin;
     this.endLink = endLink;
-    return this.link('inputs', this.endLink.chip, this.endLink.pin);
+    pin = this.endLink.pin;
+    link = this.endLink.chip.link.inputs;
+    if (link[pin] && link[pin] !== this) {
+      link[pin].unlink();
+    }
+    link[pin] = this;
+    if (!noUpdate) {
+      return this.endLink.chip.svg.set.draggable.onmovedrag();
+    }
+  };
+  Connector.prototype.unlink = function() {
+    this.unlinkStart();
+    this.unlinkEnd();
+    return this.svg.remove();
+  };
+  Connector.prototype.unlinkStart = function() {
+    var index, link, pin;
+    link = this.startLink.chip.link.outputs;
+    pin = this.startLink.pin;
+    if (link[pin]) {
+      index = link[pin].indexOf(this);
+      if (index !== -1) {
+        return link[pin].splice(index, 1);
+      }
+    }
+  };
+  Connector.prototype.unlinkEnd = function() {
+    return delete this.startLink.chip.link.inputs[this.startLink.pin];
   };
   return Connector;
 })();
@@ -240,14 +273,13 @@ GrahpicChip = (function() {
       }, 500, '>');
     };
     allSet.draggable.onmovedrag = __bind(function() {
-      var connector, connectors, linkName, _j, _len2, _ref, _ref2, _results;
+      var connector, connectors, linkName, _ref, _ref2, _results;
       this.x = rect.attr('x');
       this.y = rect.attr('y');
       _ref = this.link.inputs;
       for (linkName in _ref) {
-        connectors = _ref[linkName];
-        for (_j = 0, _len2 = connectors.length; _j < _len2; _j++) {
-          connector = connectors[_j];
+        connector = _ref[linkName];
+        if (connector) {
           connector.updateEnd({
             x: this.x,
             y: this.y + this.pinPos.inputs[linkName]
@@ -259,10 +291,10 @@ GrahpicChip = (function() {
       for (linkName in _ref2) {
         connectors = _ref2[linkName];
         _results.push((function() {
-          var _k, _len3, _results2;
+          var _j, _len2, _results2;
           _results2 = [];
-          for (_k = 0, _len3 = connectors.length; _k < _len3; _k++) {
-            connector = connectors[_k];
+          for (_j = 0, _len2 = connectors.length; _j < _len2; _j++) {
+            connector = connectors[_j];
             _results2.push(connector.updateStart({
               x: this.x + this.width,
               y: this.y + this.pinPos.outputs[linkName]
