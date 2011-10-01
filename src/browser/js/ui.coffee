@@ -20,26 +20,28 @@ $ ->
 
 Raphael.fn.hline = (x, y, width) ->
 	@path "M#{x} #{y}L#{x+width} #{y}"
-		
+
 Raphael.fn.textAlign = (x, y, str, halign = 'center', valign = 'center') ->
-	text = @text x, y, str
-	bb = text.getBBox()
+	align (@text x, y, str), halign, valign
+
+align = (obj, halign = 'center', valign = 'center') ->	
+	bb = obj.getBBox()
 	dw = bb.width/2
 	dh = bb.height/2
 	
 	switch halign
 		when 'left'
-			text.attr 'x', x + dw
+			obj.attr 'x', obj.attr('x') + dw
 		when 'right'
-			text.attr 'x', x - dw
+			obj.attr 'x', obj.attr('x') - dw
 			
 	switch valign
 		when 'top'
-			text.attr 'y', y + dh
+			obj.attr 'y', obj.attr('y') + dh
 		when 'bottom'
-			text.attr 'y', y - dh
+			obj.attr 'y', obj.attr('y') - dh
 	
-	text
+	obj
 	
 pathFormat = (start, end) ->
 	"M#{start.x} #{start.y}L#{end.x} #{end.y}"
@@ -88,7 +90,10 @@ class GrahpicChip extends Chip
 	pinY: (i) ->
 		@y+@minHeight/2+i*10
 	
-	pinClickHandler: ->
+	inputPinClickHandler = ->
+		console.log this
+		
+	outputPinClickHandler = ->
 		console.log this
 	
 	createSvg: (paper, @x, @y) ->
@@ -105,14 +110,23 @@ class GrahpicChip extends Chip
 		
 		# Make the input pins & labels
 		i = 0
-		inputs = []; maxInputWidth = 0
+		inputs = []; maxInputWidth = 0; clickRects = []
 		for input of @inputs
 			y = @pinY(i++)
 			line = paper.hline @x, y, 10
 			text = paper.textAlign @x+@pinWidth+3, y, input, 'left'
 			@pinPos.inputs[input] = y-@y
 			if (w = text.getBBox().width) > maxInputWidth then maxInputWidth = w
-			inputs.push line, text
+			
+			# Add click handlers for pin/text
+			clickRect = paper.rect(@x, y-@pinGap/2, @pinWidth+3+text.getBBox().width, @pinGap).attr
+				fill: 'transparent'
+				stroke: 'transparent'
+			$(clickRect.node).click inputPinClickHandler
+			clickRects.push clickRect
+			
+			inputs.push line, text, clickRect
+			
 		numInputs = i
 		
 		# Make the output pins & labels
@@ -124,7 +138,16 @@ class GrahpicChip extends Chip
 			text = paper.textAlign @x+@minWidth-@pinGap-3, y, output, 'right'
 			@pinPos.outputs[output] = y-@y
 			if (w = text.getBBox().width) > maxOutputWidth then maxOutputWidth = w
-			outputs.push line, text
+			
+			# Add click handlers for pin/text
+			clickRect = paper.rect(@x+@minWidth, y-@pinGap/2, @pinWidth+3+text.getBBox().width, @pinGap).attr
+				fill: 'transparent'
+				stroke: 'transparent'
+			$(clickRect.node).click outputPinClickHandler
+			clickRects.push clickRect
+			
+			outputs.push line, text, clickRect
+			
 		numOutputs = i
 		
 		
@@ -183,6 +206,9 @@ class GrahpicChip extends Chip
 				for connector in connectors
 					connector.updateStart {x: @x + @width, y: @y + @pinPos.outputs[linkName]}
 		
+		
+		for x in clickRects
+			x.toFront()
 		
 		@svg =
 			set: allSet

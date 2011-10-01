@@ -1,4 +1,4 @@
-var Chip, Clock, Connector, GrahpicChip, pathFormat;
+var Chip, Clock, Connector, GrahpicChip, align, pathFormat;
 var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
   for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
   function ctor() { this.constructor = child; }
@@ -28,32 +28,40 @@ Raphael.fn.hline = function(x, y, width) {
   return this.path("M" + x + " " + y + "L" + (x + width) + " " + y);
 };
 Raphael.fn.textAlign = function(x, y, str, halign, valign) {
-  var bb, dh, dw, text;
   if (halign == null) {
     halign = 'center';
   }
   if (valign == null) {
     valign = 'center';
   }
-  text = this.text(x, y, str);
-  bb = text.getBBox();
+  return align(this.text(x, y, str), halign, valign);
+};
+align = function(obj, halign, valign) {
+  var bb, dh, dw;
+  if (halign == null) {
+    halign = 'center';
+  }
+  if (valign == null) {
+    valign = 'center';
+  }
+  bb = obj.getBBox();
   dw = bb.width / 2;
   dh = bb.height / 2;
   switch (halign) {
     case 'left':
-      text.attr('x', x + dw);
+      obj.attr('x', obj.attr('x') + dw);
       break;
     case 'right':
-      text.attr('x', x - dw);
+      obj.attr('x', obj.attr('x') - dw);
   }
   switch (valign) {
     case 'top':
-      text.attr('y', y + dh);
+      obj.attr('y', obj.attr('y') + dh);
       break;
     case 'bottom':
-      text.attr('y', y - dh);
+      obj.attr('y', obj.attr('y') - dh);
   }
-  return text;
+  return obj;
 };
 pathFormat = function(start, end) {
   return "M" + start.x + " " + start.y + "L" + end.x + " " + end.y;
@@ -100,6 +108,7 @@ Connector = (function() {
   return Connector;
 })();
 GrahpicChip = (function() {
+  var inputPinClickHandler, outputPinClickHandler;
   __extends(GrahpicChip, Chip);
   function GrahpicChip() {
     GrahpicChip.__super__.constructor.apply(this, arguments);
@@ -111,11 +120,14 @@ GrahpicChip = (function() {
   GrahpicChip.prototype.pinY = function(i) {
     return this.y + this.minHeight / 2 + i * 10;
   };
-  GrahpicChip.prototype.pinClickHandler = function() {
+  inputPinClickHandler = function() {
+    return console.log(this);
+  };
+  outputPinClickHandler = function() {
     return console.log(this);
   };
   GrahpicChip.prototype.createSvg = function(paper, x, y) {
-    var all, allSet, element, height, i, input, inputs, line, maxInputWidth, maxOutputWidth, maxPins, name, numInputs, numOutputs, output, outputs, pinStart, rect, text, w, _i, _len;
+    var all, allSet, clickRect, clickRects, element, height, i, input, inputs, line, maxInputWidth, maxOutputWidth, maxPins, name, numInputs, numOutputs, output, outputs, pinStart, rect, text, w, _i, _j, _len, _len2;
     this.x = x;
     this.y = y;
     this.link = {
@@ -130,6 +142,7 @@ GrahpicChip = (function() {
     i = 0;
     inputs = [];
     maxInputWidth = 0;
+    clickRects = [];
     for (input in this.inputs) {
       y = this.pinY(i++);
       line = paper.hline(this.x, y, 10);
@@ -138,7 +151,13 @@ GrahpicChip = (function() {
       if ((w = text.getBBox().width) > maxInputWidth) {
         maxInputWidth = w;
       }
-      inputs.push(line, text);
+      clickRect = paper.rect(this.x, y - this.pinGap / 2, this.pinWidth + 3 + text.getBBox().width, this.pinGap).attr({
+        fill: 'transparent',
+        stroke: 'transparent'
+      });
+      $(clickRect.node).click(inputPinClickHandler);
+      clickRects.push(clickRect);
+      inputs.push(line, text, clickRect);
     }
     numInputs = i;
     i = 0;
@@ -152,7 +171,13 @@ GrahpicChip = (function() {
       if ((w = text.getBBox().width) > maxOutputWidth) {
         maxOutputWidth = w;
       }
-      outputs.push(line, text);
+      clickRect = paper.rect(this.x + this.minWidth, y - this.pinGap / 2, this.pinWidth + 3 + text.getBBox().width, this.pinGap).attr({
+        fill: 'transparent',
+        stroke: 'transparent'
+      });
+      $(clickRect.node).click(outputPinClickHandler);
+      clickRects.push(clickRect);
+      outputs.push(line, text, clickRect);
     }
     numOutputs = i;
     maxPins = Math.max(numInputs, numOutputs);
@@ -222,13 +247,17 @@ GrahpicChip = (function() {
       }
       return _results;
     }, this);
+    for (_j = 0, _len2 = clickRects.length; _j < _len2; _j++) {
+      x = clickRects[_j];
+      x.toFront();
+    }
     return this.svg = {
       set: allSet,
       items: (function() {
-        var _j, _len2, _results;
+        var _k, _len3, _results;
         _results = [];
-        for (_j = 0, _len2 = all.length; _j < _len2; _j++) {
-          element = all[_j];
+        for (_k = 0, _len3 = all.length; _k < _len3; _k++) {
+          element = all[_k];
           _results.push(element.node);
         }
         return _results;
