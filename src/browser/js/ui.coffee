@@ -14,7 +14,6 @@ $ ->
 	o.createSvg paper, 200, 50
 	
 	c = new Connector(paper, {x:300,y:300})
-	console.log c
 	c.linkStart a, 'out'
 	c.linkEnd o, 'd'
 	
@@ -89,6 +88,9 @@ class GrahpicChip extends Chip
 	pinY: (i) ->
 		@y+@minHeight/2+i*10
 	
+	pinClickHandler: ->
+		console.log this
+	
 	createSvg: (paper, @x, @y) ->
 		
 		@link =
@@ -103,7 +105,7 @@ class GrahpicChip extends Chip
 		
 		# Make the input pins & labels
 		i = 0
-		inputs = []; inputSets = []; maxInputWidth = 0
+		inputs = []; maxInputWidth = 0
 		for input of @inputs
 			y = @pinY(i++)
 			line = paper.hline @x, y, 10
@@ -111,12 +113,11 @@ class GrahpicChip extends Chip
 			@pinPos.inputs[input] = y-@y
 			if (w = text.getBBox().width) > maxInputWidth then maxInputWidth = w
 			inputs.push line, text
-			inputSets.push paper.set line, text
 		numInputs = i
 		
 		# Make the output pins & labels
 		i = 0
-		outputs = []; outputSets = []; maxOutputWidth = 0
+		outputs = []; maxOutputWidth = 0
 		for output of @outputs
 			y = @pinY(i++)
 			line = paper.hline @x+@minWidth, y, -10
@@ -124,8 +125,9 @@ class GrahpicChip extends Chip
 			@pinPos.outputs[output] = y-@y
 			if (w = text.getBBox().width) > maxOutputWidth then maxOutputWidth = w
 			outputs.push line, text
-			outputSets.push paper.set line, text
 		numOutputs = i
+		
+		
 		
 		# Calculate the required height of the chip
 		maxPins = Math.max numInputs, numOutputs
@@ -158,6 +160,8 @@ class GrahpicChip extends Chip
 		
 		allSet.attr 'cursor', 'move'
 		
+		
+		
 		# Animations for dragging of chip
 		allSet.draggable.onstartdrag = ->
 			rect.animate {'fill-opacity': 0.2}, 500, '>'
@@ -179,8 +183,7 @@ class GrahpicChip extends Chip
 				for connector in connectors
 					connector.updateStart {x: @x + @width, y: @y + @pinPos.outputs[linkName]}
 		
+		
 		@svg =
 			set: allSet
 			items: element.node for element in all
-		
-		console.log allSet

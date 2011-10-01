@@ -21,7 +21,6 @@ $(function() {
     x: 300,
     y: 300
   });
-  console.log(c);
   c.linkStart(a, 'out');
   return c.linkEnd(o, 'd');
 });
@@ -112,8 +111,11 @@ GrahpicChip = (function() {
   GrahpicChip.prototype.pinY = function(i) {
     return this.y + this.minHeight / 2 + i * 10;
   };
+  GrahpicChip.prototype.pinClickHandler = function() {
+    return console.log(this);
+  };
   GrahpicChip.prototype.createSvg = function(paper, x, y) {
-    var all, allSet, element, height, i, input, inputSets, inputs, line, maxInputWidth, maxOutputWidth, maxPins, name, numInputs, numOutputs, output, outputSets, outputs, pinStart, rect, text, w, _i, _len;
+    var all, allSet, element, height, i, input, inputs, line, maxInputWidth, maxOutputWidth, maxPins, name, numInputs, numOutputs, output, outputs, pinStart, rect, text, w, _i, _len;
     this.x = x;
     this.y = y;
     this.link = {
@@ -127,7 +129,6 @@ GrahpicChip = (function() {
     pinStart = this.minHeight / 2;
     i = 0;
     inputs = [];
-    inputSets = [];
     maxInputWidth = 0;
     for (input in this.inputs) {
       y = this.pinY(i++);
@@ -138,12 +139,10 @@ GrahpicChip = (function() {
         maxInputWidth = w;
       }
       inputs.push(line, text);
-      inputSets.push(paper.set(line, text));
     }
     numInputs = i;
     i = 0;
     outputs = [];
-    outputSets = [];
     maxOutputWidth = 0;
     for (output in this.outputs) {
       y = this.pinY(i++);
@@ -154,7 +153,6 @@ GrahpicChip = (function() {
         maxOutputWidth = w;
       }
       outputs.push(line, text);
-      outputSets.push(paper.set(line, text));
     }
     numOutputs = i;
     maxPins = Math.max(numInputs, numOutputs);
@@ -224,7 +222,7 @@ GrahpicChip = (function() {
       }
       return _results;
     }, this);
-    this.svg = {
+    return this.svg = {
       set: allSet,
       items: (function() {
         var _j, _len2, _results;
@@ -236,7 +234,6 @@ GrahpicChip = (function() {
         return _results;
       })()
     };
-    return console.log(allSet);
   };
   return GrahpicChip;
 })();
