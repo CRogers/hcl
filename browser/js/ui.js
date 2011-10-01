@@ -1,4 +1,4 @@
-var Chip, Clock, Connector, GrahpicChip, align, pathFormat;
+var Chip, Clock, Connector, GrahpicChip, align, connectorStart, pathFormat, uiMode;
 var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
   for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
   function ctor() { this.constructor = child; }
@@ -9,20 +9,16 @@ var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, par
 }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 Chip = require('chip').Chip;
 Clock = require('clock').Clock;
+uiMode = 'normal';
+connectorStart = null;
 $(function() {
-  var a, c, clock, o, paper;
+  var a, clock, o, paper;
   window.pppaper = paper = Raphael('canvasarea', '100%', '100%').draggable.enable();
   clock = new Clock();
   a = new GrahpicChip(chips.and, clock);
   a.createSvg(paper, 50, 50);
   o = new GrahpicChip(chips.dFlipFlop, clock);
-  o.createSvg(paper, 200, 50);
-  c = new Connector(paper, {
-    x: 300,
-    y: 300
-  });
-  c.linkStart(a, 'out');
-  return c.linkEnd(o, 'd');
+  return o.createSvg(paper, 200, 50);
 });
 Raphael.fn.hline = function(x, y, width) {
   return this.path("M" + x + " " + y + "L" + (x + width) + " " + y);
@@ -71,11 +67,17 @@ Raphael.fn.connectors = {
   add: function() {}
 };
 Connector = (function() {
-  function Connector(paper, start, link) {
+  function Connector(paper, startLink, endLink) {
     this.paper = paper;
-    this.start = start;
-    this.end = this.start;
-    this.svg = this.paper.path(pathFormat(start, start));
+    this.startLink = startLink;
+    this.endLink = endLink;
+    this.start = this.end = {
+      x: 0,
+      y: 0
+    };
+    this.svg = this.paper.path(pathFormat(this.start, this.end));
+    this.linkStart(this.startLink);
+    this.linkEnd(this.endLink);
   }
   Connector.prototype.update = function() {
     return this.svg.attr('path', pathFormat(this.start, this.end));
@@ -88,7 +90,7 @@ Connector = (function() {
     this.end = end;
     return this.update();
   };
-  Connector.prototype.link = function(type, obj, pin) {
+  Connector.prototype.link = function(type, obj, pin, noUpdate) {
     var link;
     link = obj.link[type];
     if (!link[pin]) {
@@ -97,13 +99,17 @@ Connector = (function() {
     if (link[pin].indexOf(this === -1)) {
       link[pin].push(this);
     }
-    return obj.svg.set.draggable.onmovedrag();
+    if (!noUpdate) {
+      return obj.svg.set.draggable.onmovedrag();
+    }
   };
-  Connector.prototype.linkStart = function(obj, pin) {
-    return this.link('outputs', obj, pin);
+  Connector.prototype.linkStart = function(startLink, noUpdate) {
+    this.startLink = startLink;
+    return this.link('outputs', this.startLink.chip, this.startLink.pin);
   };
-  Connector.prototype.linkEnd = function(obj, pin) {
-    return this.link('inputs', obj, pin);
+  Connector.prototype.linkEnd = function(endLink, noUpdate) {
+    this.endLink = endLink;
+    return this.link('inputs', this.endLink.chip, this.endLink.pin);
   };
   return Connector;
 })();
@@ -120,14 +126,32 @@ GrahpicChip = (function() {
   GrahpicChip.prototype.pinY = function(i) {
     return this.y + this.minHeight / 2 + i * 10;
   };
-  inputPinClickHandler = function() {
-    return console.log(this);
+  outputPinClickHandler = function(chip, pin) {
+    return function() {
+      if (uiMode === 'normal') {
+        connectorStart = {
+          chip: chip,
+          pin: pin
+        };
+        return uiMode = 'connector';
+      }
+    };
   };
-  outputPinClickHandler = function() {
-    return console.log(this);
+  inputPinClickHandler = function(chip, pin) {
+    return function() {
+      var c;
+      if (uiMode === 'connector') {
+        c = new Connector(chip.paper, connectorStart, {
+          chip: chip,
+          pin: pin
+        });
+        return uiMode = 'normal';
+      }
+    };
   };
   GrahpicChip.prototype.createSvg = function(paper, x, y) {
     var all, allSet, clickRect, clickRects, element, height, i, input, inputs, line, maxInputWidth, maxOutputWidth, maxPins, name, numInputs, numOutputs, output, outputs, pinStart, rect, text, w, _i, _j, _len, _len2;
+    this.paper = paper;
     this.x = x;
     this.y = y;
     this.link = {
@@ -155,7 +179,7 @@ GrahpicChip = (function() {
         fill: 'transparent',
         stroke: 'transparent'
       });
-      $(clickRect.node).click(inputPinClickHandler);
+      $(clickRect.node).click(inputPinClickHandler(this, input));
       clickRects.push(clickRect);
       inputs.push(line, text, clickRect);
     }
@@ -175,7 +199,9 @@ GrahpicChip = (function() {
         fill: 'transparent',
         stroke: 'transparent'
       });
-      $(clickRect.node).click(outputPinClickHandler);
+      clickRect = align(clickRect, 'right');
+      clickRect = align(clickRect, 'right');
+      $(clickRect.node).click(outputPinClickHandler(this, output));
       clickRects.push(clickRect);
       outputs.push(line, text, clickRect);
     }

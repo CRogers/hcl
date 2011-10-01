@@ -1,6 +1,12 @@
 Chip = require('chip').Chip
 Clock = require('clock').Clock
 
+
+uiMode = 'normal' #'connector'
+
+# connector
+connectorStart = null
+
 $ ->
 
 	window.pppaper = paper = Raphael('canvasarea', '100%', '100%').draggable.enable()
@@ -13,9 +19,7 @@ $ ->
 	o = new GrahpicChip(chips.dFlipFlop, clock)
 	o.createSvg paper, 200, 50
 	
-	c = new Connector(paper, {x:300,y:300})
-	c.linkStart a, 'out'
-	c.linkEnd o, 'd'
+	#c = new Connector(paper, {chip:a, pin:'out'}, {chip:o, pin:'d'})
 	
 
 Raphael.fn.hline = (x, y, width) ->
@@ -53,9 +57,11 @@ Raphael.fn.connectors =
 	
 class Connector
 	
-	constructor: (@paper, @start, link) ->
-		@end = @start
-		@svg = @paper.path pathFormat start, start
+	constructor: (@paper, @startLink, @endLink) ->
+		@start = @end = {x:0, y:0}
+		@svg = @paper.path pathFormat @start, @end
+		@linkStart @startLink
+		@linkEnd @endLink
 		
 	update: ->
 		@svg.attr 'path', pathFormat @start, @end
@@ -63,7 +69,7 @@ class Connector
 	updateStart: (@start) -> @update()
 	updateEnd: (@end) -> @update()		
 		
-	link: (type, obj, pin) ->
+	link: (type, obj, pin, noUpdate) ->
 		link = obj.link[type]
 		
 		if not link[pin]
@@ -72,13 +78,14 @@ class Connector
 		if link[pin].indexOf this == -1
 			link[pin].push this
 		
-		obj.svg.set.draggable.onmovedrag()
+		if not noUpdate
+			obj.svg.set.draggable.onmovedrag()
 	
-	linkStart: (obj, pin) -> 
-		@link 'outputs', obj, pin
+	linkStart: (@startLink, noUpdate) -> 
+		@link 'outputs', @startLink.chip, @startLink.pin
 		
-	linkEnd:   (obj, pin) -> 
-		@link 'inputs', obj, pin
+	linkEnd:   (@endLink, noUpdate) -> 
+		@link 'inputs', @endLink.chip, @endLink.pin
 	
 class GrahpicChip extends Chip		
 	
@@ -90,13 +97,23 @@ class GrahpicChip extends Chip
 	pinY: (i) ->
 		@y+@minHeight/2+i*10
 	
-	inputPinClickHandler = ->
-		console.log this
+	outputPinClickHandler = (chip, pin) ->
+		->
+			if uiMode is 'normal'
+				connectorStart =
+					chip: chip
+					pin: pin
+				uiMode = 'connector'
 		
-	outputPinClickHandler = ->
-		console.log this
+	inputPinClickHandler = (chip, pin) ->
+		->
+			if uiMode is 'connector'
+				c = new Connector chip.paper, connectorStart,
+					chip: chip
+					pin: pin
+				uiMode = 'normal'
 	
-	createSvg: (paper, @x, @y) ->
+	createSvg: (@paper, @x, @y) ->
 		
 		@link =
 			inputs: {}
@@ -122,7 +139,7 @@ class GrahpicChip extends Chip
 			clickRect = paper.rect(@x, y-@pinGap/2, @pinWidth+3+text.getBBox().width, @pinGap).attr
 				fill: 'transparent'
 				stroke: 'transparent'
-			$(clickRect.node).click inputPinClickHandler
+			$(clickRect.node).click inputPinClickHandler(this, input)
 			clickRects.push clickRect
 			
 			inputs.push line, text, clickRect
@@ -143,7 +160,12 @@ class GrahpicChip extends Chip
 			clickRect = paper.rect(@x+@minWidth, y-@pinGap/2, @pinWidth+3+text.getBBox().width, @pinGap).attr
 				fill: 'transparent'
 				stroke: 'transparent'
-			$(clickRect.node).click outputPinClickHandler
+				
+			# 2 aligns as it starts off aligned left not right. Yeah, I know.
+			clickRect = align clickRect, 'right'
+			clickRect = align clickRect, 'right'
+			
+			$(clickRect.node).click outputPinClickHandler(this, output)
 			clickRects.push clickRect
 			
 			outputs.push line, text, clickRect
