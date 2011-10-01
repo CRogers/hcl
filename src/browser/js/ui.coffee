@@ -3,7 +3,7 @@ Clock = require('clock').Clock
 
 $ ->
 
-	paper = Raphael('canvasarea', '100%', '100%').draggable.enable()
+	window.pppaper = paper = Raphael('canvasarea', '100%', '100%').draggable.enable()
 	
 	clock = new Clock()
 	
@@ -12,6 +12,11 @@ $ ->
 	
 	o = new GrahpicChip(chips.dFlipFlop, clock)
 	o.createSvg paper, 200, 50
+	
+	c = new Connector(paper, {x:300,y:300})
+	console.log c
+	c.linkStart a, 'out'
+	c.linkEnd o, 'd'
 	
 
 Raphael.fn.hline = (x, y, width) ->
@@ -52,7 +57,43 @@ Raphael.fn.textAlign = (x, y, str, halign = 'center', valign = 'center') ->
 	
 	text
 	
+pathFormat = (start, end) ->
+	"M#{start.x} #{start.y}L#{end.x} #{end.y}"
 
+Raphael.fn.connectors =
+	items: {}
+	
+	add: ->
+	
+class Connector
+	
+	constructor: (@paper, @start, link) ->
+		@end = @start
+		@svg = @paper.path pathFormat start, start
+		
+	update: ->
+		@svg.attr 'path', pathFormat @start, @end
+		
+	updateStart: (@start) -> @update()
+	updateEnd: (@end) -> @update()		
+		
+	link: (type, obj, pin) ->
+		link = obj.link[type]
+		
+		if not link[pin]
+			link[pin] = []
+	
+		if link[pin].indexOf this == -1
+			link[pin].push this
+		
+		obj.svg.set.draggable.onmovedrag()
+	
+	linkStart: (obj, pin) -> 
+		@link 'outputs', obj, pin
+		
+	linkEnd:   (obj, pin) -> 
+		@link 'inputs', obj, pin
+	
 class GrahpicChip extends Chip		
 	
 	minWidth: 70
@@ -65,6 +106,14 @@ class GrahpicChip extends Chip
 	
 	createSvg: (paper, @x, @y) ->
 		
+		@link =
+			inputs: {}
+			outputs: {}
+			
+		@pinPos =
+			inputs: {}
+			outputs: {}
+		
 		pinStart = @minHeight/2
 		
 		# Make the input pins & labels
@@ -74,6 +123,7 @@ class GrahpicChip extends Chip
 			y = @pinY(i++)
 			line = paper.hline @x, y, 10
 			text = paper.textAlign @x+@pinWidth+3, y, input, 'left'
+			@pinPos.inputs[input] = y-@y
 			if (w = text.getBBox().width) > maxInputWidth then maxInputWidth = w
 			inputs.push line, text
 			inputSets.push paper.set line, text
@@ -86,6 +136,7 @@ class GrahpicChip extends Chip
 			y = @pinY(i++)
 			line = paper.hline @x+@minWidth, y, -10
 			text = paper.textAlign @x+@minWidth-@pinGap-3, y, output, 'right'
+			@pinPos.outputs[output] = y-@y
 			if (w = text.getBBox().width) > maxOutputWidth then maxOutputWidth = w
 			outputs.push line, text
 			outputSets.push paper.set line, text
@@ -107,24 +158,44 @@ class GrahpicChip extends Chip
 			'font-size': 12
 			'fill': 'white'
 		
-		width = name.getBBox().width + 2*@pinGap + 2*10 + maxInputWidth*2 + maxOutputWidth*2
+		@width = name.getBBox().width + 2*@pinGap + 2*10 + maxInputWidth*2 + maxOutputWidth*2
 		
-		rect.attr 'width', width
-		name.attr 'x', @x+width/2
+		rect.attr 'width', @width
+		name.attr 'x', @x+@width/2
 		
 		for output in outputs
-			output.translate width - @minWidth, 0
+			output.translate @width - @minWidth, 0
 		
 		# Make the entire chip into a set
-		all = paper.set().draggable.enable()
-		all.push(rect, name)
-		setPushArr all, inputs, outputs
+		all = [rect, name].concat inputs, outputs
+		allSet = paper.set().draggable.enable()
+		allSet.push.apply this, all
 		
-		all.attr 'cursor', 'move'
+		allSet.attr 'cursor', 'move'
 		
 		# Animations for dragging of chip
-		all.draggable.onstartdrag = ->
+		allSet.draggable.onstartdrag = ->
 			rect.animate {'fill-opacity': 0.2}, 500, '>'
 		
-		all.draggable.onenddrag = ->
+		allSet.draggable.onenddrag = ->
 			rect.animate {'fill-opacity': 0.05}, 500, '>'
+			
+		# Make the connections move with the links
+		allSet.draggable.onmovedrag = =>
+			@x = rect.attr 'x'
+			@y = rect.attr 'y'
+		
+			# Loop through each list of links from each pin and update it's position
+			for linkName, connectors of @link.inputs
+				for connector in connectors
+					connector.updateEnd {x: @x, y: @y + @pinPos.inputs[linkName]}
+			
+			for linkName, connectors of @link.outputs
+				for connector in connectors
+					connector.updateStart {x: @x + @width, y: @y + @pinPos.outputs[linkName]}
+		
+		@svg =
+			set: allSet
+			items: element.node for element in all
+		
+		console.log allSet
